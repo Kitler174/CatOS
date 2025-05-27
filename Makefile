@@ -1,54 +1,27 @@
-# Kompilator C i asembler
-CC = /home/mateusz/cross-compiler/bin/x86_64-elf-gcc
-AS = nasm
-LD = /home/mateusz/cross-compiler/bin/x86_64-elf-ld
+ASM = nasm
+CC = gcc
+LD = ld
 
-# Flagi kompilacji i linkowania
-ASFLAGS = -f elf64
-CFLAGS = -ffreestanding -mno-red-zone -nostdlib -fPIE -I/usr/include/efi -I/usr/include/efi/x86_64 -DEFI_FUNCTION_WRAPPER
-LDFLAGS = -nostdlib -znocombreloc -T linker.ld -L/usr/lib -lefi -lgnuefi
+all: os-image.bin
 
-# Struktura katalogów dla ISO
-ISO_DIR = iso
-EFI_DIR = $(ISO_DIR)/EFI
-BOOT_DIR = $(EFI_DIR)/BOOT
-BOOTX64 = $(BOOT_DIR)/BOOTX64.EFI
-ISO = myos.iso
+boot.bin: boot.asm
+	$(ASM) -f bin boot.asm -o boot.bin
 
-# Pliki źródłowe i obiektowe
-BOOT_SRC = boot_t.asm
-KERNEL_SRC = kernel.c
-BOOT_OBJ = boot_t.o
-KERNEL_OBJ = kernel.o
+kernel.o: kernel.c
+	$(CC) -ffreestanding -m32 -fno-pic -c kernel.c -o kernel.o
 
-# Domyślny cel: buduj ISO
-all: iso
+kernel_entry.o: kernel.asm
+	$(ASM) -f elf32 kernel.asm -o kernel_entry.o
 
-# Budowanie pliku EFI (bootloader + jądro)
-build: $(BOOTX64)
+kernel.bin: kernel_entry.o kernel.o
+	ld -m elf_i386 -Ttext 0x1000 -o kernel.elf kernel_entry.o kernel.o
+	objcopy -O binary kernel.elf kernel.bin
 
-$(BOOT_OBJ): $(BOOT_SRC)
-	@mkdir -p $(BOOT_DIR)
-	$(AS) $(ASFLAGS) $(BOOT_SRC) -o $(BOOT_OBJ)
+os-image.bin: boot.bin kernel.bin
+	cat boot.bin kernel.bin > os-image.bin
 
-$(KERNEL_OBJ): $(KERNEL_SRC)
-	$(CC) $(CFLAGS) -c $(KERNEL_SRC) -o $(KERNEL_OBJ)
+run: os-image.bin
+	qemu-system-i386 -drive format=raw,file=os-image.bin
 
-$(BOOTX64): $(BOOT_OBJ) $(KERNEL_OBJ)
-	@mkdir -p $(BOOT_DIR)
-	$(LD) $(LDFLAGS) -o $(BOOTX64) $(BOOT_OBJ) $(KERNEL_OBJ)
-
-# Tworzenie bootowalnego obrazu ISO z konfiguracją UEFI
-iso: build
-	xorriso -as mkisofs \
-	    --efi-boot EFI/BOOT/BOOTX64.EFI \
-	    --output $(ISO) $(ISO_DIR)
-
-# Uruchomienie w QEMU
-run: iso
-	qemu-system-x86_64 -bios /usr/share/OVMF/OVMF_CODE_4M.fd -cdrom myos.iso -m 512M -vga std -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_VARS_4M.fd -serial stdio
-
-# Czyszczenie plików tymczasowych
 clean:
-	rm -f $(BOOT_OBJ) $(KERNEL_OBJ)
-	rm -rf $(ISO_DIR) $(ISO)
+	rm -f *.bin *.o *.elf
