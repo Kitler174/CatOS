@@ -1,13 +1,31 @@
-.set MAGIC, 0x1badb002
-.set FLAGS, (1<<0 | 1<<1)
-.set CHECKSUM, -(MAGIC + FLAGS)
+.set MB2_MAGIC,     0xE85250D6
+.set MB2_ARCH,      0                  # i386
+.set MB2_HEADERLEN, header_end - mb2_header
+.set MB2_CHECKSUM,  -(MB2_MAGIC + MB2_ARCH + MB2_HEADERLEN)
 
 .section .multiboot
-    .long MAGIC
-    .long FLAGS
-    .long CHECKSUM
-    
+.align 8
+mb2_header:
+    .long MB2_MAGIC
+    .long MB2_ARCH
+    .long MB2_HEADERLEN
+    .long MB2_CHECKSUM
 
+    # --- Framebuffer tag (type=5) ---
+    .short 5         # type
+    .short 0         # flags
+    .long 24         # size (24 bytes including header and padding)
+    .long 1024       # width
+    .long 768        # height
+    .long 32         # depth (bpp)
+    .long 0          # PADDING (4 bajty paddingu, żeby mieć 24 bajty)
+
+    # --- End tag (type=0) ---
+    .short 0         # type
+    .short 0         # reserved
+    .long 8          # size
+
+header_end:
 
 .section .text
 .extern kernelMain
@@ -15,10 +33,10 @@
 .global loader
 
 loader:
-    mov $kernel_stack, %esp
+    lea kernel_stack_end, %esp
     call callConstructors
-    push %eax
-    push %ebx
+    push %ebx          # pointer to multiboot2 info struct
+    push %eax          # magic
     call kernelMain
 
 _stop:
@@ -26,7 +44,6 @@ _stop:
     hlt
     jmp _stop
 
-.section .bss 
-.space 2*1024*1024;
-kernel_stack:
-    
+.section .bss
+    .space 131072
+kernel_stack_end:
