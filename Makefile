@@ -11,7 +11,6 @@ objects = loader.o kernel.o cpp/mouse.o cpp/login.o cpp/framebuffer.o cpp/struct
 %.o: %.s
 	as $(ASPARAMS) -o $@ $<
 
-# Reguła dla plików w cpp/
 cpp/%.o: cpp/%.cpp
 	g++ $(GPPPARAMS) -o $@ -c $<
 
@@ -43,3 +42,26 @@ mykernel.iso: mykernel.bin
 
 run: mykernel.iso
 	qemu-system-i386 -cdrom mykernel.iso
+
+# =========================
+# MULTITASK DEMO SECTION
+# =========================
+
+# Kompilacja context switch asm
+context_switch.o: context_switch.asm
+	nasm -f elf $< -o $@
+
+# Kompilacja multitaskingu
+task.o: task.c
+	gcc -m32 -c $< -o $@
+
+main.o: main.c
+	gcc -m32 -c $< -o $@
+
+multitask: main.o task.o context_switch.o
+	gcc -m32 -o $@ $^
+
+run-multitask: multitask
+	./multitask
+
+.PHONY: install run run-multitask

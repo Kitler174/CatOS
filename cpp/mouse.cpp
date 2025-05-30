@@ -3,7 +3,7 @@
 int mouse_x = 100, mouse_y = 100;
 uint8_t mouse_buttons = 0;
 
-static int screen_w = 640, screen_h = 480;
+static int screen_w = 1024, screen_h = 768;
 
 void mouse_draw_cursor(uint32_t* fb, int fb_width, int fb_height, uint32_t color) {
     // Prosty krzyżyk jako kursor
@@ -33,8 +33,6 @@ void mouse_poll() {
     static uint8_t packet[3];
     static int packet_idx = 0;
 
-    // Sprawdź, czy jest coś w PS/2 port 0x60
-    if ((inb(0x64) & 1) == 0) return;
 
     packet[packet_idx++] = inb(0x60);
 
@@ -45,7 +43,6 @@ void mouse_poll() {
         mouse_x += dx;
         mouse_y -= dy; // kierunek Y odwrotny
 
-        // Granice ekranu
         if (mouse_x < 0) mouse_x = 0;
         if (mouse_y < 0) mouse_y = 0;
         if (mouse_x >= screen_w) mouse_x = screen_w - 1;
