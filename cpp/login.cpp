@@ -5,10 +5,12 @@
 #include "../h/structs.h"
 
 int screen_w, screen_h;
+
 void login(uint32_t magic, uint32_t mb2_addr) {
     uint8_t* addr = (uint8_t*)mb2_addr;
     uint32_t total_size = *(uint32_t*)addr;
     addr += 8;
+
     while (true) {
         multiboot2_tag* tag = (multiboot2_tag*)addr;
         if (tag->type == 0) break; // end tag
@@ -21,15 +23,16 @@ void login(uint32_t magic, uint32_t mb2_addr) {
             uint8_t  fb_bpp = *(uint8_t*)(addr + 28);
             uint32_t* fb = (uint32_t*)(uintptr_t)fb_addr;
 
+            // Buforowanie statycznych elementów
+            draw_rect(fb, fb_width, fb_height, 0, 0, fb_width, fb_height, 0x000000FF); // Tło
+            draw_rect(fb, fb_width, fb_height, fb_width / 2 - 256, fb_height / 2 - 256, 512, 512, 0x000000); // Czarny prostokąt
+            draw_rect(fb, fb_width, fb_height, fb_width / 2 - 178, fb_height / 2 - 150, 356, 50, 0xFFFFFF); // Górny biały prostokąt
+            draw_rect(fb, fb_width, fb_height, fb_width / 2 - 178, fb_height / 2 - 75, 356, 50, 0xFFFFFF); // Dolny biały prostokąt
+            mouse_init();
+            // Pętla rysująca tylko dynamiczne elementy (kursor myszy)
             while (1) {
-                mouse_poll();
-                draw_rect(fb, fb_width, fb_height, 0, 0, fb_width, fb_height, 0x000000FF); 
-                draw_rect(fb, fb_width, fb_height, fb_width/2-256, fb_height/2-256, 512, 512, 0x000000);
-                draw_rect(fb, fb_width, fb_height, fb_width/2-178, fb_height/2-150, 356, 50, 0xFFFFFF);
-                draw_rect(fb, fb_width, fb_height, fb_width/2-178, fb_height/2-75, 356, 50, 0xFFFFFF);
-                mouse_draw_cursor(fb, fb_width, fb_height, 0x00FF0000); 
+                mouse_poll(fb, fb_width, fb_height, 0x00FF0000);
             }
-
         }
         addr += (tag->size + 7) & ~7;
     }
