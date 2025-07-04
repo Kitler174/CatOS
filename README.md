@@ -1,66 +1,66 @@
 # CatOS
 
-CatOS to minimalistyczny system operacyjny, rozwijany głównie w językach Makefile, C oraz Assembly. Projekt ten ma na celu edukację oraz eksperymentowanie z podstawami budowy systemów operacyjnych od zera.
+CatOS is a minimalist operating system project, developed mainly in Makefile, C, and Assembly. The primary goal of this project is educational—to experiment and learn the basics of building an operating system from scratch.
 
-## Spis treści
+## Table of Contents
 
-- [Opis](#opis)
-- [Funkcjonalności](#funkcjonalności)
-- [Wymagania](#wymagania)
-- [Budowanie](#budowanie)
-- [Uruchamianie](#uruchamianie)
-- [Struktura katalogów](#struktura-katalogów)
-- [Licencja](#licencja)
-- [Autor](#autor)
+- [About](#about)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Building](#building)
+- [Running](#running)
+- [Directory Structure](#directory-structure)
+- [License](#license)
+- [Author](#author)
 
-## Opis
+## About
 
-CatOS to projekt systemu operacyjnego pisanego głównie dla celów edukacyjnych. W repozytorium znajdziesz kod źródłowy bootloadera, kernela, pliki konfiguracyjne oraz skrypty budujące.
+CatOS is a hobby operating system project for educational purposes. The repository contains the source code for the bootloader, kernel, configuration files, and build scripts.
 
-## Funkcjonalności
+## Features
 
-- Prosty bootloader
-- Podstawowy kernel w C i assemblerze
-- Zarządzanie pamięcią (w fazie rozwoju)
-- Obsługa wejścia/wyjścia z klawiatury i ekranu
-- Możliwość uruchamiania w emulatorze QEMU
+- Simple bootloader
+- Basic kernel written in C and Assembly
+- (In progress) Memory management
+- Basic keyboard and screen I/O
+- Can be run in the QEMU emulator
 
-## Wymagania
+## Requirements
 
-- Kompilator `gcc` oraz `nasm`
+- `gcc` and `nasm` compilers
 - `make`
-- Opcjonalnie: emulator QEMU
+- (Optional) QEMU emulator
 
-## Budowanie
+## Building
 
-Aby zbudować projekt, użyj polecenia:
+To build the project, run:
 
 ```sh
 make
 ```
 
-Wszystkie artefakty budowania pojawią się w katalogu `build/`.
+All build artifacts will appear in the `build/` directory.
 
-## Uruchamianie
+## Running
 
-Aby uruchomić system w emulatorze QEMU:
+To run the system in QEMU:
 
 ```sh
 make run
 ```
 
-Lub uruchom wygenerowany obraz ISO w wybranym emulatorze.
+Or run the generated ISO image in your preferred emulator.
 
-## Struktura katalogów
+## Directory Structure
 
-- `src/` – kod źródłowy kernela i bootloadera
-- `build/` – pliki wynikowe po kompilacji
-- `Makefile` – plik budujący projekt
+- `src/` – Source code for the kernel and bootloader
+- `build/` – Build output files
+- `Makefile` – Project build script
 
-## Licencja
+## License
 
-Projekt dostępny na licencji MIT.
+This project is licensed under the MIT License.
 
-## Autor
+## Author
 
-Projekt rozwijany przez [Kitler174](https://github.com/Kitler174).
+Developed by [Kitler174](https://github.com/Kitler174).
